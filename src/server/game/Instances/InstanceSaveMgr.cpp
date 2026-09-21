@@ -791,8 +791,15 @@ void InstanceSaveMgr::_ResetOrWarnAll(uint32 mapid, Difficulty difficulty, bool 
 
 InstancePlayerBind* InstanceSaveMgr::PlayerBindToInstance(ObjectGuid guid, InstanceSave* save, bool permanent, Player* player /*= nullptr*/)
 {
-// custom: nunca gravar bind permanente para raids, eliminando o lockout semanal // (dungeons continuam funcionando normalmente, pois não usam bind permanente) if (MapEntry const* mapEntry = save->GetMapEntry()) if (mapEntry->IsRaid()) permanent = false; bool const persistBinding = !sToCloud9Sidecar->ClusterModeEnabled() || sToCloud9Sidecar->IsMapAssigned(save->GetMapId());
+    // custom: nunca gravar bind permanente para raids, eliminando o lockout semanal
+    // (dungeons continuam funcionando normalmente, pois não usam bind permanente)
+    if (MapEntry const* mapEntry = save->GetMapEntry())
+        if (mapEntry->IsRaid())
+            permanent = false;
+    bool const persistBinding = !sToCloud9Sidecar->ClusterModeEnabled() || sToCloud9Sidecar->IsMapAssigned(save->GetMapId());
+
     InstancePlayerBind& bind = playerBindStorage[guid]->m[save->GetDifficulty()][save->GetMapId()];
+
     ASSERT(!bind.perm || permanent); // ensure there's no changing permanent to temporary, this can be done only by unbinding
 
     if (bind.save)
