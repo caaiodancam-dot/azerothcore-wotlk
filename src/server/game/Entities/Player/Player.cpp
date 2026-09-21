@@ -13751,14 +13751,21 @@ void Player::_LoadSkills(PreparedQueryResult result)
             SkillRaceClassInfoEntry const* rcEntry = GetSkillRaceClassInfo(skill, getRace(), getClass());
             if (!rcEntry)
             {
-                LOG_ERROR("entities.player", "Player {} (GUID: {}), has skill ({}) that is invalid for the race/class combination (Race: {}, Class: {}). Will be deleted.",
-                    GetName(), GetGUID().GetCounter(), skill, getRace(), getClass());
+                LOG_ERROR("entities.player", "Loading invalid skill ({}) for player {}.",
+                    skill, GetName());
 
-                // Mark skill for deletion in the database
-                mSkillStatus.insert(SkillStatusMap::value_type(skill, SkillStatusData(0, SKILL_DELETED)));
+                SetUInt32Value(PLAYER_SKILL_INDEX(count), MAKE_PAIR32(skill, 1));
+                SetUInt32Value(PLAYER_SKILL_VALUE_INDEX(count), MAKE_SKILL_VALUE(value, max));
+                SetUInt32Value(PLAYER_SKILL_BONUS_INDEX(count), 0);
+
+                mSkillStatus.insert(SkillStatusMap::value_type(skill, SkillStatusData(count, SKILL_UNCHANGED)));
+
+                loadedSkillValues[skill] = value;
+
+                ++count;
+
                 continue;
             }
-
             // set fixed skill ranges
             switch (GetSkillRangeType(rcEntry))
             {
