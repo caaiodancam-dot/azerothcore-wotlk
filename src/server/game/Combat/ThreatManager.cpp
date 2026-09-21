@@ -206,6 +206,10 @@ void ThreatReference::HeapNotifyDecreased()
             if (tWho->GetSummonerGUID().IsPlayer())
                 return false;
 
+    // accessories are fully treated as components of the parent and cannot have threat
+    if (cWho->HasUnitTypeMask(UNIT_MASK_ACCESSORY))
+        return false;
+
     return true;
 }
 
